@@ -823,7 +823,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   net:
-    layers: 06000000060000000600000002000000
+    layers: 060000000c0000000c00000002000000
   fitness: 0
   carController: {fileID: 5509389355002175870}
   rayRange: 5

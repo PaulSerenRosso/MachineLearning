@@ -19,10 +19,10 @@ public class DataManager : MonoBehaviour
         SetPath();
     }
 
-    public void Save(List<NeuralNetwork> _nets)
+    public void Save(List<NeuralNetwork> _nets, int generationCount)
     {
         StreamWriter streamWriter = new StreamWriter(path, false, encoding);
-        Data         data         = new Data { nets = _nets };
+        Data         data         = new Data { nets = _nets, generationCount = generationCount};
 
         serializer.Serialize(streamWriter, data);
         streamWriter.Close();

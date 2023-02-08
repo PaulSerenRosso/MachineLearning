@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 public class NeuralNetwork
 {
     public int[] layers = new[] { 6, 6,6, 2 };
-    public float[][] neurons;
+    public Neuron[][] neurons;
     public float[][][] axons;
     private int x;
     private int y;
@@ -21,6 +21,7 @@ public class NeuralNetwork
 
     public NeuralNetwork()
     {
+        
     }
 
     public NeuralNetwork(int[] layersModel, bool isOneMethod = true)
@@ -31,7 +32,6 @@ public class NeuralNetwork
         {
             layers[x] = layersModel[x];
         }
-
         InitNeurons();
         InitAxons();
     }
@@ -95,8 +95,10 @@ public class NeuralNetwork
     
         public void FeedForward(float[] inputs)
         {
-            neurons[0] = inputs;
-
+            for (x = 0; x < neurons[0].Length; x++)
+            {
+                neurons[0][x].UpdateNeuron(inputs[x]);
+            }
             for ( x = 1; x < layers.Length; x++)
             {
                 for ( y = 0; y < layers[x]; y++)
@@ -105,10 +107,9 @@ public class NeuralNetwork
 
                     for ( yPreviousLayer = 0; yPreviousLayer < layers[x -1]; yPreviousLayer++)
                     {
-                        value += neurons[x - 1][yPreviousLayer] * axons[x - 1][yPreviousLayer][y];
+                        value += neurons[x - 1][yPreviousLayer].Ouput * axons[x - 1][yPreviousLayer][y];
                     }
-
-                    neurons[x][y] = (float)Math.Tanh(value);
+                    neurons[x][y].UpdateNeuron((float)Math.Tanh(value));
                 }
             }
         }
@@ -159,10 +160,24 @@ public class NeuralNetwork
 //
     private void InitNeurons()
     {
-        neurons = new float[layers.Length][];
-        for (x = 0; x < layers.Length; x++)
+        neurons = new Neuron[layers.Length][];
+        neurons[0] = new BasicNeuron[layers[0]];
+        for (y = 0; y < neurons[0].Length; y++)
         {
-            neurons[x] = new float[layers[x]];
+            neurons[0][y] = new BasicNeuron();
+        }
+        neurons[^1] = new BasicNeuron[layers[^1]];
+        for (y = 0; y < neurons[^1].Length; y++)
+        {
+            neurons[^1][y] = new BasicNeuron();
+        }
+        for (x = 1; x < layers.Length-1; x++)
+        {
+            neurons[x] = new LongShortTermMemoryCell[layers[x]];
+            for (y = 0; y < neurons[x].Length; y++)
+            {
+                neurons[x][y] = new LongShortTermMemoryCell();
+            }
         }
     }
 
@@ -184,7 +199,7 @@ public class NeuralNetwork
         // rendre propoertionnel à l'efficacité de notre voiture 
         // avoir plusieurs thickness
         
-        public void Mutate(float probability, float power)
+        public void Mutate(float axonProbability, float neuronProbability, float power)
         {
             for (x = 0; x < axons.Length; x++)
             {
@@ -192,13 +207,35 @@ public class NeuralNetwork
                 {
                     for (z = 0; z < axons[x][y].Length; z++)
                     {
-                        
-                        if ( Random.value< probability)
+                        if ( Random.value< axonProbability)
                         {
                           // value = Random.Range(-power, power);
                             axons[x][y][z] += Random.Range(-power, power);
                         }
                     }
+                }
+            }
+
+            for (x = 0; x < neurons.Length; x++)
+            {
+                for (y = 0; y < neurons[x].Length; y++)
+                {
+                    if ( Random.value< neuronProbability)
+                    {
+                        neurons[x][y].Mutate();
+                    }
+                }
+            }
+            
+        }
+
+        public void ResetNeuralNetworkForNewGeneration()
+        {
+            for (x = 0; x < neurons.Length; x++)
+            {
+                for (y = 0; y < neurons[x].Length; y++)
+                {
+                    neurons[x][y].Init();
                 }
             }
         }

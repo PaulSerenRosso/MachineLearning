@@ -40,10 +40,10 @@ public class Agent : MonoBehaviour
       inputs = new float[net.layers[0]];
       carController.Reset();
       fitness = 0;
+      net.ResetNeuralNetworkForNewGeneration();
       totalCheckPointDist = 0;
       nextCheckPoint = CheckPointManager.instance.firstCheckPoint.transform;
       nextCheckPointDist = (nextCheckPoint.position - transform.position).magnitude;
-      Debug.Log(transform.position);
     }
 
     void FitnessUpdate()
@@ -71,14 +71,13 @@ public class Agent : MonoBehaviour
     private void OutputUpdate()
     {
         net.FeedForward(inputs);
-        carController.horizontalInput = net.neurons[^1][0];
-        carController.verticalInput = net.neurons[^1][1];
+        carController.horizontalInput = net.neurons[^1][0].Ouput;
+        carController.verticalInput = net.neurons[^1][1].Ouput;
     }
 
     private void InputUpdate()
     {
         carPosition = transform.position;
-       Debug.Log(inputs.Length);
         inputs[0] = RaySensor(carPosition + Vector3.up * 0.2f, transform.forward, 4f);
         inputs[1] = RaySensor(carPosition + Vector3.up * 0.2f, transform.right, 1.5f);
         inputs[2] = RaySensor(carPosition + Vector3.up * 0.2f, -transform.right, 4f);

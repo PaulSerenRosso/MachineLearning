@@ -3,25 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using TMPro;
 using Unity.Mathematics;
-using UnityEditor.Timeline;
 using UnityEngine;
 
 public class AgentManager : MonoBehaviour
 {
-    [SerializeField]
-    private int populuationSize = 100;
-
-    [SerializeField] private float trainingDuration;
-
-    [SerializeField] private float mutationRate = 5;
-    [SerializeField] private float mutationPower = 5;
+    
+    
     [SerializeField] private Agent agentPrefab;
     [SerializeField] private Transform agentGroup;
 
     private Agent agent; 
     List<Agent> agents= new ();
     [SerializeField] private CameraController cameraController;
+    [SerializeField] private TMP_Text timerText;
+    [SerializeField] private TMP_Text generationCountText;
+    private int generationCount; 
+    private float startingTime;
+
+    public AgentGlobalSettingsSO so;
+    public static AgentManager instance;
+    private void Awake()
+    {
+        instance = this; 
+    }
+
+
     private void Start()
     {
         StartCoroutine(Loop());
@@ -31,23 +39,31 @@ public class AgentManager : MonoBehaviour
     {
         StartNewGeneration();
         Focus();
-        yield return new WaitForSeconds(trainingDuration);
+        yield return new WaitForSeconds(so.trainingDuration);
         StartCoroutine(Loop());
     }
 
     private void Focus()
     {
+        NeuralNetworkViewer.instance.Refresh(agents[0]);
         cameraController.target = agents[0].transform;
     } 
 
     private void StartNewGeneration()
     {
+        ResetTimer();
         agents = agents.OrderByDescending(a=> a.fitness).ToList();
         AddOrRemoveAgent();
-
         Mutate();
         ResetAgents();
         SetDefaultMaterials();
+        RefreshGenerationCount();
+    }
+
+    private void RefreshGenerationCount()
+    {
+        generationCount++;
+        generationCountText.text = generationCount.ToString();
     }
 
 
@@ -56,16 +72,27 @@ public class AgentManager : MonoBehaviour
         for (int i = agents.Count/2; i < agents.Count; i++)
         {
             agents[i].net.CopyNet(agents[i-(agents.Count/2)].net);
-            agents[i].net.Mutate(mutationRate, mutationPower);
+            agents[i].net.Mutate(so.axonMutationRate, so.neuronMutationRate ,so.axonMutationPower );
             agents[i].SetMutatedMaterial();
         }
     }
 
+    void ResetTimer()
+    {
+        startingTime = Time.time; 
+    }
+
+    private void Update()
+    {
+        timerText.text = (so.trainingDuration - (Time.time - startingTime)).ToString("f0");
+        
+    }
+
     private void AddOrRemoveAgent()
     {
-        if (agents.Count != populuationSize)
+        if (agents.Count != so.populationSize)
         {
-            int dif = populuationSize - agents.Count;
+            int dif = so.populationSize - agents.Count;
             if (dif > 0)
             {
                 for (int i = 0; i < dif; i++)
@@ -118,12 +145,13 @@ public class AgentManager : MonoBehaviour
         {
             nets.Add(agents[i].net);
         }
-        DataManager.instance.Save(nets);
+        DataManager.instance.Save(nets, generationCount);
     }
 
     public void Load()
     {
         Data data = DataManager.instance.Load();
+        generationCount = data.generationCount;
         if (data != null)
         {
             for (int i = 0; i < agents.Count; i++)
