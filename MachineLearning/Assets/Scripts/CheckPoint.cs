@@ -5,8 +5,9 @@ using UnityEngine;
 // prendre en compte les voitures 
 public class CheckPoint : MonoBehaviour
 {
-    public Transform nextCheckPoint;
+    public CheckPoint nextCheckPoint;
 
+    public float index;
     private void OnTriggerEnter(Collider other)
     {
         Agent agent = other.GetComponent<Agent>();
@@ -16,6 +17,8 @@ public class CheckPoint : MonoBehaviour
             {
                 agent.CheckPointReached(nextCheckPoint);
             }
+
+            agent.currentCheckPointRatioIndex = index/CheckPointManager.instance.checkPointCount;
         }
     }
 }

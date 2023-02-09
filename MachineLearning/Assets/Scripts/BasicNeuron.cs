@@ -24,4 +24,10 @@ public class BasicNeuron : Neuron
     {
        
     }
+
+    public override void Copy(Neuron copy)
+    {
+        output = 0; 
+    }
+    
 }

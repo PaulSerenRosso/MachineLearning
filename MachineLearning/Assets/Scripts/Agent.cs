@@ -19,9 +19,10 @@ public class Agent : MonoBehaviour
     [SerializeField] private Material mutatedMaterial; 
     [SerializeField] private Vector3 carPosition;
     private float[] inputs = new float[5];
+    [SerializeField] private float alignedTolerance;
 
     [SerializeField] private Rigidbody rb;
-    public Transform nextCheckPoint;
+    public CheckPoint nextCheckPoint;
 
     [SerializeField]
     float totalCheckPointDist;
@@ -29,8 +30,11 @@ public class Agent : MonoBehaviour
     private float distanceTraveled; 
 
     [SerializeField] private float nextCheckPointDist;
+    [SerializeField]
+    private float thicknessRemovedWhenNotAligned;
 
-   
+     public  float  currentCheckPointRatioIndex;
+
     public void ResetAgent()
     {
       transform.position = Vector3.zero;
@@ -42,8 +46,9 @@ public class Agent : MonoBehaviour
       fitness = 0;
       net.ResetNeuralNetworkForNewGeneration();
       totalCheckPointDist = 0;
-      nextCheckPoint = CheckPointManager.instance.firstCheckPoint.transform;
-      nextCheckPointDist = (nextCheckPoint.position - transform.position).magnitude;
+      nextCheckPoint = CheckPointManager.instance.firstCheckPoint;
+      nextCheckPointDist = (nextCheckPoint.transform.position - transform.position).magnitude;
+      currentCheckPointRatioIndex = 0;
     }
 
     void FitnessUpdate()
@@ -51,11 +56,15 @@ public class Agent : MonoBehaviour
         distanceTraveled = totalCheckPointDist + (nextCheckPointDist-(nextCheckPoint.transform.position - transform.position).magnitude);
         if (fitness < distanceTraveled)
         {
-            fitness = distanceTraveled;
+            fitness += distanceTraveled-fitness;
+        }
+
+        if (Vector3.Dot(transform.up, Vector3.up)<alignedTolerance)
+        {
+            fitness -= thicknessRemovedWhenNotAligned*Time.deltaTime;
         }
     }
-
-
+    
     public void SetFirstMaterial() => renderer.material = firstMaterial; 
     public void SetDefaultMaterial() => renderer.material = defaultMaterial; 
     public void SetMutatedMaterial() => renderer.material = mutatedMaterial; 
@@ -84,6 +93,7 @@ public class Agent : MonoBehaviour
         inputs[3] = RaySensor(carPosition + Vector3.up * 0.2f, transform.forward+transform.right, 2f);
         inputs[4] = RaySensor(carPosition + Vector3.up * 0.2f, transform.forward-transform.right, 2f);
         inputs[5] = 1;
+        inputs[6] = currentCheckPointRatioIndex;
 
     }
 
@@ -92,23 +102,24 @@ public class Agent : MonoBehaviour
     // travailler avec les mêmes inputs donner les meme inputs sinon perte de statbilité
     float RaySensor(Vector3 origin, Vector3 direction, float length)
     {
-        Debug.DrawRay(origin, direction * hit.distance,
-            Color.Lerp(Color.red, Color.green, Mathf.InverseLerp(length * rayRange, 0, hit.distance)));
         if (Physics.Raycast(origin, direction, out hit, length * rayRange, layerMask))
         {
+        Debug.DrawRay(origin, direction * hit.distance,
+            Color.Lerp(Color.red, Color.green, Mathf.InverseLerp(length * rayRange, 0, hit.distance)));
             return Mathf.InverseLerp(length * rayRange, 0, hit.distance);
         }
         else
         {
-            Debug.DrawRay(origin, direction*length*rayRange, Color.red);
+         
+            Debug.DrawRay(origin, direction*length*rayRange, Color.blue);
             return 0;
         }
     }
 
-    public void CheckPointReached(Transform checkPoint)
+    public void CheckPointReached(CheckPoint checkPoint)
     {
         totalCheckPointDist += nextCheckPointDist;
         nextCheckPoint = checkPoint;
-        nextCheckPointDist = (nextCheckPoint.position - transform.position).magnitude;
+        nextCheckPointDist = (nextCheckPoint.transform.position - transform.position).magnitude;
     }
 }

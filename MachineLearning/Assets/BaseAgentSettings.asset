@@ -14,23 +14,53 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   populationSize: 100
   trainingDuration: 30
-  axonMutationRate: 1
-  neuronMutationRate: 1
-  axonMutationPower: 0.1
+  axonMutation:
+    probability: 0.5
+    power: 0.1
+  startLongTermMemoryMutation:
+    probability: 0.5
+    power: 0.1
+  startShortTermMemoryMutation:
+    probability: 0.5
+    power: 0.1
   longShortTermMemoryCellGlobalSettings:
   - type: 0
-    biasMutation: 0.1
-    inputWeightMutation: 0.1
-    shortTermMemoryWeightMutation: 0.1
+    biasMutation:
+      probability: 0.5
+      power: 0.1
+    inputWeightMutation:
+      probability: 0.5
+      power: 0.1
+    shortTermMemoryWeightMutation:
+      probability: 0.5
+      power: 0.1
   - type: 1
-    biasMutation: 0.1
-    inputWeightMutation: 0.1
-    shortTermMemoryWeightMutation: 0.1
+    biasMutation:
+      probability: 0.5
+      power: 0.1
+    inputWeightMutation:
+      probability: 0.5
+      power: 0.1
+    shortTermMemoryWeightMutation:
+      probability: 0.5
+      power: 0.1
   - type: 2
-    biasMutation: 0.1
-    inputWeightMutation: 0.1
-    shortTermMemoryWeightMutation: 0.1
+    biasMutation:
+      probability: 0.5
+      power: 0.1
+    inputWeightMutation:
+      probability: 0.5
+      power: 0.1
+    shortTermMemoryWeightMutation:
+      probability: 0.5
+      power: 0.1
   - type: 3
-    biasMutation: 0.1
-    inputWeightMutation: 0.1
-    shortTermMemoryWeightMutation: 0.1
+    biasMutation:
+      probability: 0.5
+      power: 0.1
+    inputWeightMutation:
+      probability: 0.5
+      power: 0.1
+    shortTermMemoryWeightMutation:
+      probability: 0.5
+      power: 0.1

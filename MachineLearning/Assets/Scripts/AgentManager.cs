@@ -72,7 +72,7 @@ public class AgentManager : MonoBehaviour
         for (int i = agents.Count/2; i < agents.Count; i++)
         {
             agents[i].net.CopyNet(agents[i-(agents.Count/2)].net);
-            agents[i].net.Mutate(so.axonMutationRate, so.neuronMutationRate ,so.axonMutationPower );
+            agents[i].net.Mutate(so.axonMutation );
             agents[i].SetMutatedMaterial();
         }
     }

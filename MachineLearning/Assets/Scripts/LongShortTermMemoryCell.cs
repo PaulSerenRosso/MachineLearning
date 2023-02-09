@@ -16,6 +16,8 @@ public class LongShortTermMemoryCell : Neuron
     public LongShortTermMemoryCellComponent potentialNewLongTermMemoryToRememberFactor;
     public LongShortTermMemoryCellComponent potentialShortMemoryToRememberFactor;
 
+    public float startLongTermMemory;
+    public float startShortTermMemory;
     private AgentGlobalSettingsSO so;
     private int i;
 
@@ -30,19 +32,30 @@ public class LongShortTermMemoryCell : Neuron
 
     public override void Init()
     {
-     
+        /*
+        longTermMemory = startLongTermMemory;
+        shortTermMemory = startShortTermMemory;
+        */
         longTermMemory = 0;
-        shortTermMemory = 0;
+        shortTermMemory = 0; 
         longTermToRememberFactor.SetActivationFunction((value) => 1.0f / (1.0f + Mathf.Exp(-value)));
         potentialNewLongMemoryToRemember.SetActivationFunction((value) => math.tanh(value));
         potentialNewLongTermMemoryToRememberFactor.SetActivationFunction((value) => 1.0f / (1.0f + Mathf.Exp(-value)));
         potentialShortMemoryToRememberFactor.SetActivationFunction((value) => 1.0f / (1.0f + Mathf.Exp(-value)));
-        output = 0;
+/*
+longTermToRememberFactor.SetActivationFunction((value) => math.tanh(value));
+        potentialNewLongMemoryToRemember.SetActivationFunction((value) => math.tanh(value));
+        potentialNewLongTermMemoryToRememberFactor.SetActivationFunction((value) => math.tanh(value));
+        potentialShortMemoryToRememberFactor.SetActivationFunction((value) => math.tanh(value));
+        */
+        output = shortTermMemory;
         so = AgentManager.instance.so;
     }
 
     public override void Mutate()
     {
+   //     so.startLongTermMemoryMutation.MutateValue(ref startLongTermMemory);
+     //   so.startShortTermMemoryMutation.MutateValue(ref startShortTermMemory);
         for (i = 0; i < so.longShortTermMemoryCellGlobalSettings.Length; i++)
         {
             switch (so.longShortTermMemoryCellGlobalSettings[i].type)
@@ -71,6 +84,8 @@ public class LongShortTermMemoryCell : Neuron
         }
     }
 
+ 
+
     public override void UpdateNeuron(float input)
     {
         UpdateForgetGate(input);
@@ -95,10 +110,25 @@ public class LongShortTermMemoryCell : Neuron
         shortTermMemory = math.tanh(longTermMemory) *
                           potentialShortMemoryToRememberFactor.GetResult(input, shortTermMemory);
     }
+  
+    public override void Copy(Neuron copy)
+    {
+        LongShortTermMemoryCell cell = (LongShortTermMemoryCell)copy;
+        
+        longTermMemory = cell.longTermMemory;
+        shortTermMemory = cell.shortTermMemory;
+        longTermToRememberFactor.Copy(cell.longTermToRememberFactor);
+        potentialNewLongMemoryToRemember.Copy(cell.potentialNewLongMemoryToRemember);
+        potentialNewLongTermMemoryToRememberFactor.Copy(cell.potentialNewLongTermMemoryToRememberFactor);
+        potentialShortMemoryToRememberFactor.Copy(cell.potentialShortMemoryToRememberFactor);
+        startLongTermMemory = cell.startLongTermMemory;
+        startShortTermMemory = cell.startShortTermMemory;
+        so = cell.so;
+    }
 }
 
 [Serializable]
-public class LongShortTermMemoryCellComponent
+public class LongShortTermMemoryCellComponent 
 {
     public float inputWeight;
     public float shortTermMemoryWeight;
@@ -117,10 +147,9 @@ public class LongShortTermMemoryCellComponent
 
     public void Mutate(LongShortTermMemoryCellComponentSettings settings)
     {
-        inputWeight += Random.Range(-settings.inputWeightMutation, settings.inputWeightMutation);
-        shortTermMemoryWeight +=
-            Random.Range(-settings.shortTermMemoryWeightMutation, settings.shortTermMemoryWeightMutation);
-        bias += Random.Range(-settings.biasMutation, settings.biasMutation);
+        settings.inputWeightMutation.MutateValue(ref inputWeight);
+        settings.biasMutation.MutateValue(ref bias);
+        settings.shortTermMemoryWeightMutation.MutateValue(ref shortTermMemoryWeight);
     }
 
     public LongShortTermMemoryCellComponent()
@@ -128,5 +157,14 @@ public class LongShortTermMemoryCellComponent
         inputWeight = Random.Range(-1f, 1f);
         shortTermMemoryWeight = Random.Range(-1f, 1f);
         bias = Random.Range(-1f, 1f);
+    }
+
+
+    public void Copy(LongShortTermMemoryCellComponent copy)
+    {
+        bias = copy.bias;
+        activationFunction = copy.activationFunction;
+        inputWeight = copy.inputWeight;
+        shortTermMemoryWeight = copy.shortTermMemoryWeight;
     }
 }

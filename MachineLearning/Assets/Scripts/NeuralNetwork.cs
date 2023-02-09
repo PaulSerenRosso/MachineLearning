@@ -194,12 +194,21 @@ public class NeuralNetwork
                 }
                 
             }
+
+            for (x = 0; x < netCopy.axons.Length; x++)
+            {
+                for (y = 0; y < netCopy.axons[x].Length; y++)
+                {
+                    neurons[x][y].Copy(netCopy.neurons[x][y]);
+                }
+            }
+
         }
 
         // rendre propoertionnel à l'efficacité de notre voiture 
         // avoir plusieurs thickness
         
-        public void Mutate(float axonProbability, float neuronProbability, float power)
+        public void Mutate(NeuralNetworkMutation axonMutation)
         {
             for (x = 0; x < axons.Length; x++)
             {
@@ -207,11 +216,7 @@ public class NeuralNetwork
                 {
                     for (z = 0; z < axons[x][y].Length; z++)
                     {
-                        if ( Random.value< axonProbability)
-                        {
-                          // value = Random.Range(-power, power);
-                            axons[x][y][z] += Random.Range(-power, power);
-                        }
+                        axonMutation.MutateValue(ref axons[x][y][z]);
                     }
                 }
             }
@@ -220,10 +225,7 @@ public class NeuralNetwork
             {
                 for (y = 0; y < neurons[x].Length; y++)
                 {
-                    if ( Random.value< neuronProbability)
-                    {
-                        neurons[x][y].Mutate();
-                    }
+                    neurons[x][y].Mutate();
                 }
             }
             

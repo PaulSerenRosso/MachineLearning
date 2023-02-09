@@ -7,8 +7,10 @@ public class CheckPointManager : MonoBehaviour
 {
     public static CheckPointManager instance;
 
+    public List<CheckPoint> allCheckPoints = new List<CheckPoint>();
     public CheckPoint firstCheckPoint;
-    
+
+    public float checkPointCount;
     private void Awake()
     {
         instance = this;
@@ -18,20 +20,25 @@ public class CheckPointManager : MonoBehaviour
     [ContextMenu("init")]
     void Init()
     {
-        var allCheckPoint = new List<CheckPoint>();
+        allCheckPoints.Clear();
         foreach (Transform child in transform)
         {
-            allCheckPoint.Add(child.GetComponent<CheckPoint>());
+            allCheckPoints.Add(child.GetComponent<CheckPoint>());
+            
         }
 
-        firstCheckPoint = allCheckPoint[0];
-        
-        for (int i = 0; i < allCheckPoint.Count-1; i++)
+        checkPointCount = allCheckPoints.Count;
+
+        firstCheckPoint = allCheckPoints[0];
+
+        for (int i = 0; i < allCheckPoints.Count - 1; i++)
         {
-            allCheckPoint[i].nextCheckPoint = allCheckPoint[i + 1].transform;
-        }
-
-        allCheckPoint[^1].nextCheckPoint = allCheckPoint[0].transform;
+            allCheckPoints[i].nextCheckPoint = allCheckPoints[i + 1];
+            allCheckPoints[i].index =  i; 
         
+        }
+     
+        allCheckPoints[^1].nextCheckPoint = allCheckPoints[0];
+        allCheckPoints[^1].index = allCheckPoints.Count - 1;
     }
 }
